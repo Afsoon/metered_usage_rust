@@ -1,0 +1,16 @@
+[package]
+name = "metered_usage"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "metered_usage"
+path = "service.rs"
+
+[dependencies]
+async-trait = "0.1.89"
+chrono = { version = "0.4.41" }
+clickhouse = { version = "0.13.3", features = ["uuid", "time", "chrono"] }
+serde = { version = "1.0.219", features = ["derive"] }
+serde_repr = "0.1.20"
+uuid = { version = "1.18.0", features = ["serde", "v4"] }
