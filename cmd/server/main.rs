@@ -2,6 +2,7 @@ pub mod server;
 
 use crate::server::{ServerState, events_handler};
 use metered_usage::infrastructure::clickhouse_client::ClickhouseClient;
+use std::env;
 use std::sync::Arc;
 
 #[tokio::main]
@@ -12,13 +13,18 @@ async fn main() {
         clickhouse_client_creator: client,
     });
 
-    let listner = tokio::net::TcpListener::bind("127.0.0.1:8000")
-        .await
-        .unwrap();
+    let host = match env::var("HOST") {
+        Ok(host) => host,
+        Err(_) => "127.0.0.1".into(),
+    };
 
-    println!("Listening server in 127.0.0.1:8000");
+    let api_url = format!("{host}:8000");
 
-    axum::serve(listner, events_handler(server_state))
+    let listener = tokio::net::TcpListener::bind(&api_url).await.unwrap();
+
+    println!("Listening server in {}", api_url);
+
+    axum::serve(listener, events_handler(server_state))
         .await
         .unwrap()
 }
