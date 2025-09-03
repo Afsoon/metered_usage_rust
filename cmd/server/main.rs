@@ -18,7 +18,12 @@ async fn main() {
         Err(_) => "127.0.0.1".into(),
     };
 
-    let api_url = format!("{host}:8000");
+    let port = match env::var("PORT") {
+        Ok(port) => port,
+        Err(_) => "8000".into(),
+    };
+
+    let api_url = format!("{host}:{port}");
 
     let listener = tokio::net::TcpListener::bind(&api_url).await.unwrap();
 
