@@ -1,5 +1,6 @@
 services:
   clickhouse:
+    profiles: ["third", "all"]
     build:
       context: ./docker/clickhouse
       dockerfile: Dockerfile
@@ -13,8 +14,45 @@ services:
       nofile:
         soft: 262144
         hard: 262144
+    develop:
+      watch:
+        - path: docker/clickhouse/init
+          action: rebuild
 
   api:
+    profiles: ["all"]
     build:
-      context: ./docker/server
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./docker/server/Dockerfile.dev
+    working_dir: /src
+    command: bacon api --headless
+    ports:
+      - "8000:8000"
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "8000"
+    depends_on:
+      - clickhouse
+    develop:
+      watch:
+        - path: ./cmd/server
+          action: sync
+          x-initialSync: true
+          target: /src/cmd/server
+          ignore:
+            - Cargo.toml
+            - .gitignore
+
+        - path: ./services/metered_usage
+          action: sync
+          x-initialSync: true
+          target: /src/services
+          ignore:
+            - Cargo.toml
+            - .gitignore
+
+        - path: ./cmd/server/Cargo.toml
+          action: rebuild
+
+        - path: ./services/metered_usage/Cargo.toml
+          action: rebuild

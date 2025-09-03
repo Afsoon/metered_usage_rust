@@ -10,7 +10,7 @@ use metered_usage::{
 use std::sync::Arc;
 
 async fn root() -> &'static str {
-    "Hello, World!"
+    "Hello, Bacon!"
 }
 
 async fn save_event(State(api_state): State<Arc<ServerState>>) -> Result<Json<()>, ()> {

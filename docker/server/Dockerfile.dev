@@ -1,0 +1,11 @@
+FROM rust:1.89 as builder
+
+RUN cargo install --locked bacon
+WORKDIR /src
+COPY . .
+
+RUN cargo build -p server
+
+EXPOSE 8000
+
+CMD ["bacon", "api", "--headless"]
