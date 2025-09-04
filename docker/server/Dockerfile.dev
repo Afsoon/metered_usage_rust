@@ -8,4 +8,4 @@ RUN cargo build -p server
 
 EXPOSE 8000
 
-CMD ["bacon", "api", "--headless"]
+CMD ["make", "dev-container-start-api"]

@@ -5,9 +5,27 @@ use metered_usage::infrastructure::clickhouse_client::ClickhouseClient;
 use std::env;
 use std::sync::Arc;
 use tokio::signal;
+use tracing::{debug, info};
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
 async fn main() {
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| {
+                // axum logs rejections from built-in extractors with the `axum::rejection`
+                // target, at `TRACE` level. `axum::rejection=trace` enables showing those events
+                format!(
+                    "{}=TRACE,tower_http=debug,axum::rejection=trace",
+                    env!("CARGO_CRATE_NAME")
+                )
+                .into()
+            }),
+        )
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
+    info!("Initializing Clickhouse client");
     let client = ClickhouseClient::new();
 
     let server_state = Arc::new(ServerState {
@@ -28,7 +46,7 @@ async fn main() {
 
     let listener = tokio::net::TcpListener::bind(&api_url).await.unwrap();
 
-    println!("Listening server in the url {}", api_url);
+    debug!("Listening server in the url {}", api_url);
 
     axum::serve(listener, events_handler(server_state))
         .with_graceful_shutdown(shutdown_signal())

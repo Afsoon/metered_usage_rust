@@ -25,7 +25,7 @@ services:
       context: .
       dockerfile: ./docker/server/Dockerfile.dev
     working_dir: /src
-    command: bacon api --headless
+    command: make dev-container-start-api
     ports:
       - "8000:8000"
     environment:

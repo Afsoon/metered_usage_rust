@@ -8,6 +8,15 @@ name = "api_analytic_metered_usage"
 path = "main.rs"
 
 [dependencies]
-axum = "0.8.4"
-tokio = { version = "1.47.1", features = ["macros", "rt-multi-thread", "signal"] }
+axum = { version = "0.8.4", features = ["tracing"] }
+tokio = { version = "1.47.1", features = [
+    "macros",
+    "rt-multi-thread",
+    "signal",
+] }
+tower-http = { version = "0.6.6", features = ["trace"] }
 metered_usage = { path = "../../services/metered_usage" }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }

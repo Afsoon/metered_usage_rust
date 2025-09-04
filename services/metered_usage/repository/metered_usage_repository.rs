@@ -1,9 +1,11 @@
 use std::io::Error;
 
 use clickhouse::Client;
+use tracing::{Level, event, instrument};
 
 use crate::repository::models::Row;
 
+#[derive(Debug)]
 pub struct MeteredUsageRepository {}
 
 impl MeteredUsageRepository {
@@ -11,15 +13,16 @@ impl MeteredUsageRepository {
         return MeteredUsageRepository {};
     }
 
+    #[instrument(skip(self, db_client))]
     pub async fn insert<'c>(&self, event: Row, db_client: &'c Client) -> Result<(), Error> {
-        println!("Starting transaction");
+        event!(Level::INFO, "Starting transaction");
         let mut insert = db_client.insert("metered_usage")?;
 
         insert.write(&event).await?;
-        println!("Beflor flusing");
+        event!(Level::INFO, "Before flusing");
 
         insert.end().await?;
-        println!("Ending transaction");
+        event!(Level::INFO, "Ended transaction");
 
         return Ok(());
     }

@@ -1,7 +1,25 @@
+use std::fmt;
+
 use clickhouse::Client;
 
+pub struct ClientWrapper(Client);
+
+impl fmt::Debug for ClientWrapper {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_tuple("ClientClikhouseWrapper").finish()
+    }
+}
+
+impl std::ops::Deref for ClientWrapper {
+    type Target = Client;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
 pub struct ClickhouseClient {
-    connection: Client,
+    connection: ClientWrapper,
 }
 
 impl ClickhouseClient {
@@ -13,11 +31,11 @@ impl ClickhouseClient {
             .with_database("analytics");
 
         return ClickhouseClient {
-            connection: clickhouse_client,
+            connection: ClientWrapper(clickhouse_client),
         };
     }
 
-    pub fn clone(&self) -> Client {
-        return self.connection.clone();
+    pub fn clone(&self) -> ClientWrapper {
+        return ClientWrapper(self.connection.0.clone());
     }
 }

@@ -1,33 +1,38 @@
 use std::io::Error;
+use tracing::Level;
+use tracing::info;
+use tracing::instrument;
 
-use clickhouse::Client;
-
+use crate::infrastructure::clickhouse_client::ClientWrapper;
 use crate::{
     repository::metered_usage_repository::MeteredUsageRepository,
     services::entities::MeteredUsageEvent,
 };
 
+#[derive(Debug)]
 pub struct MeteredUsageService {
     pub repository: MeteredUsageRepository,
-    pub db_client: Client,
+    pub db_client: ClientWrapper,
 }
 
 impl MeteredUsageService {
-    pub fn new(db_client: Client) -> MeteredUsageService {
+    #[instrument(skip_all)]
+    pub fn new(db_client: ClientWrapper) -> MeteredUsageService {
         return MeteredUsageService {
             repository: MeteredUsageRepository::new(),
-            db_client,
+            db_client: db_client,
         };
     }
 
+    #[instrument(level = Level::INFO, skip(self))]
     pub async fn insert_metered_event(
         &self,
         event: MeteredUsageEvent,
-        db_client: &Client,
+        db_client: &ClientWrapper,
     ) -> Result<(), Error> {
-        println!("Before inserting");
+        info!("Before inserting");
         self.repository.insert(event.into(), &db_client).await?;
-        println!("After inserting");
+        info!("After inserting");
 
         return Ok(());
     }
