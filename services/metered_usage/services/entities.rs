@@ -7,9 +7,9 @@ use crate::repository::models::{Row, UsageType};
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct MeteredUsageEvent {
     #[serde(with = "uuid::serde::simple")]
-    customer_id: uuid::Uuid,
-    usage_type: MeteredUsageEventType,
-    created_at: DateTime<Utc>,
+    pub customer_id: uuid::Uuid,
+    pub usage_type: MeteredUsageEventType,
+    pub created_at: DateTime<Utc>,
 }
 
 impl MeteredUsageEvent {
@@ -24,9 +24,9 @@ impl MeteredUsageEvent {
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum MeteredUsageEventType {
-    ApiCall = 1,
-    Storage = 2,
-    ExecutionTime = 3,
+    ApiCall,
+    Storage,
+    ExecutionTime,
 }
 
 impl From<MeteredUsageEventType> for UsageType {

@@ -1,3 +1,4 @@
+pub mod entities;
 pub mod server;
 
 use crate::server::{ServerState, events_handler};

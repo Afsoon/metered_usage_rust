@@ -957,6 +957,7 @@ dependencies = [
  "axum",
  "chrono",
  "metered_usage",
+ "serde",
  "tokio",
  "tower-http",
  "tracing",

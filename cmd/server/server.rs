@@ -1,6 +1,6 @@
 use axum::{
-    Json, Router,
-    extract::{MatchedPath, State},
+    Router,
+    extract::{Json, MatchedPath, State, rejection::JsonRejection},
     http::Request,
     routing::{get, post},
 };
@@ -10,24 +10,35 @@ use metered_usage::{
 };
 use std::sync::Arc;
 use tower_http::trace::{DefaultOnFailure, DefaultOnRequest, DefaultOnResponse, TraceLayer};
-use tracing::{Level, instrument};
-use tracing::{debug, info_span};
+use tracing::{Level, debug, error, info, info_span, instrument};
 use uuid::Uuid;
 
-async fn root() -> &'static str {
-    info_span!("TEST");
+use crate::entities::MeteredUsagePayload;
 
+async fn root() -> &'static str {
     return "Hello, Bacon!";
 }
 
 #[instrument(skip_all)]
-async fn save_event(State(api_state): State<Arc<ServerState>>) -> Result<Json<()>, ()> {
+async fn save_event(
+    State(api_state): State<Arc<ServerState>>,
+    payload: Result<Json<MeteredUsagePayload>, JsonRejection>,
+) -> Result<Json<()>, ()> {
     debug!("Creation service...");
     let service = MeteredUsageService::new(api_state.clickhouse_client_creator.clone());
     debug!("Service created...");
 
+    info!("is empty {:?}", payload.is_err());
+    let event_to_create: MeteredUsageEvent = match payload {
+        Ok(Json(body)) => body.into(),
+        Err(err) => {
+            error!("Unable to process body, {:?}", err);
+            MeteredUsageEvent::random()
+        }
+    };
+
     let operation_result = service
-        .insert_metered_event(MeteredUsageEvent::random(), &service.db_client)
+        .insert_metered_event(event_to_create, &service.db_client)
         .await;
 
     return match operation_result {

@@ -1,4 +1,4 @@
-.PHONY: dev-third-party-services dev-all dev-start-api dev-parquet build-prod-api-image build-and-publish-prod-api-image start-again dev-container-start-api help
+.PHONY: dev-third-party-services dev-all dev-start-api dev-parquet build-prod-api-image build-and-publish-prod-api-image start-again dev-container-start-api test-post help
 
 help: # Show help for each of the Makefile recipes.
 	@grep -E '^[a-zA-Z0-9 -]+:.*#'  Makefile | sort | while read -r l; do printf "\033[1;32m$$(echo $$l | cut -f 1 -d':')\033[00m:$$(echo $$l | cut -f 2- -d'#')\n"; done
@@ -51,3 +51,6 @@ start-again: # Nuke all images, volumes and unused images to rebuild from zero o
 
 	@echo "Rebuilding docker compose"
 	docker compose build --no-cache
+
+test-post: #Temporal make command until we have a cli tool to test it
+	curl -X POST --header "Content-Type: application/json" -d @body_test_request.json http://localhost:8000

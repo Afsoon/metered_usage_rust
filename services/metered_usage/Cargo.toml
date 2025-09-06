@@ -10,8 +10,8 @@ path = "service.rs"
 [dependencies]
 async-trait = "0.1.89"
 clickhouse = { version = "0.13.3", features = ["uuid", "time", "chrono"] }
-serde = { version = "1.0.219", features = ["derive"] }
 serde_repr = "0.1.20"
+serde = { workspace = true }
 uuid = { workspace = true }
 chrono = { workspace = true }
 tracing = { workspace = true }
