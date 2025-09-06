@@ -1,3 +1,4 @@
+use std::env;
 use std::fmt;
 
 use clickhouse::Client;
@@ -24,11 +25,13 @@ pub struct ClickhouseClient {
 
 impl ClickhouseClient {
     pub fn new() -> Self {
+        let clickhouse_config = ClickhouseConfig::new();
+
         let clickhouse_client = Client::default()
-            .with_url("http://localhost:8123/")
-            .with_user("default")
-            .with_password("admin")
-            .with_database("analytics");
+            .with_url(clickhouse_config.url)
+            .with_user(clickhouse_config.user)
+            .with_password(clickhouse_config.password)
+            .with_database(clickhouse_config.database);
 
         return ClickhouseClient {
             connection: ClientWrapper(clickhouse_client),
@@ -37,5 +40,43 @@ impl ClickhouseClient {
 
     pub fn clone(&self) -> ClientWrapper {
         return ClientWrapper(self.connection.0.clone());
+    }
+}
+
+struct ClickhouseConfig {
+    url: String,
+    user: String,
+    password: String,
+    database: String,
+}
+
+impl ClickhouseConfig {
+    pub fn new() -> Self {
+        let url = match env::var("CLICKHOUSE_URL") {
+            Ok(url) => url,
+            Err(_) => "http://localhost:8123".into(),
+        };
+
+        let user = match env::var("CLICKHOUSE_USER") {
+            Ok(user) => user,
+            Err(_) => "default".into(),
+        };
+
+        let password = match env::var("CLICKHOUSE_PASSWORD") {
+            Ok(password) => password,
+            Err(_) => "admin".into(),
+        };
+
+        let database = match env::var("CLICKHOUSE_DATABASE") {
+            Ok(database) => database,
+            Err(_) => "analytics".into(),
+        };
+
+        return ClickhouseConfig {
+            url,
+            user,
+            password,
+            database,
+        };
     }
 }

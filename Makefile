@@ -27,8 +27,6 @@ dev-start-api: # Running the api on mode watch (Non container mode)
 dev-parquet: # Running the parquet binary on mode watch (Non container mode)
 	bacon parqet
 
-dev-container-start-api: # Running the api on mode watch (Non container mode)
-	RUST_LOG=INFO bacon api --headless
 
 build-prod-api-image: check_image_tag_env_var # Building a prod imag locally
 	@echo "Building container image"

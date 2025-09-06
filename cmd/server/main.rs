@@ -32,6 +32,19 @@ async fn main() {
         clickhouse_client_creator: client,
     });
 
+    let api_url = get_server_url();
+
+    let listener = tokio::net::TcpListener::bind(&api_url).await.unwrap();
+
+    debug!("Listening server in the url {}", api_url);
+
+    axum::serve(listener, events_handler(server_state))
+        .with_graceful_shutdown(shutdown_signal())
+        .await
+        .unwrap()
+}
+
+fn get_server_url() -> String {
     let host = match env::var("HOST") {
         Ok(host) => host,
         Err(_) => "127.0.0.1".into(),
@@ -42,16 +55,7 @@ async fn main() {
         Err(_) => "8000".into(),
     };
 
-    let api_url = format!("{host}:{port}");
-
-    let listener = tokio::net::TcpListener::bind(&api_url).await.unwrap();
-
-    debug!("Listening server in the url {}", api_url);
-
-    axum::serve(listener, events_handler(server_state))
-        .with_graceful_shutdown(shutdown_signal())
-        .await
-        .unwrap()
+    return format!("{host}:{port}");
 }
 
 async fn shutdown_signal() {
